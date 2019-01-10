@@ -24,6 +24,7 @@ def iron_golem_bin_check(hdr,pw_index):
         if data.find("Subquery returns more than 1 row") != -1:
             return chr(bin_num + 1)
                 
+#한글 유니코드값 10진수 범위 : 44032 ~ 50813
 
 def iron_golem(ans,hdr):
     for pw_index in range(1,129):
