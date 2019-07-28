@@ -5,14 +5,20 @@ import sys
 from probs import *
 
 class losHelper:
-    headers = {'User-Agent' : "" ,'cookie': ""}
+    
+    cookie = ""
 
     def prob_choose(self):
-        print("문제의 이름을 입력하세요. : ")
-        prob = sys.stdin.readline().split()
-        prob = ''.join(prob)
-        
-        globals()[prob](self.headers)
+        try:
+            print("문제의 이름을 입력하세요. : ")
+            prob = sys.stdin.readline().split()
+            prob = ''.join(prob)
+            
+            globals()[prob](self.cookie)
+        except KeyError as e:
+            print("없는 문제를 입력하셨습니다.")
+            sys.exit()
+
 
         
     
@@ -21,9 +27,8 @@ class losHelper:
         cookie_data = sys.stdin.readline().split()
         cookie_data = ''.join(cookie_data)
         
-        self.headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36"
-        self.headers['cookie'] = cookie_data
-    
+        # self.headers['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36"
+        self.cookie = cookie_data   
         
 if __name__ == "__main__":
 
